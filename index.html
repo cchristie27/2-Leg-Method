@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The 2-Leg Method — verified betting record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04060B;
+  --panel:#090D15;
+  --panel-2:#0D1320;
+  --line:#171F2E;
+  --line-2:#232E42;
+  --blue:#2F7BFF;
+  --blue-hi:#6BA6FF;
+  --txt:#EEF3FB;
+  --mut:#7B8AA3;
+  --mut-2:#4B5A73;
+  --loss:#FF4D62;
+  --sp:clamp(16px,4.5vw,30px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#04060B !important}
+body{
+  color:var(--txt);
+  font-family:"Barlow Condensed",system-ui,sans-serif;
+  font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+/* The dark surface is a real element, so a host page or preview
+   frame that overrides body{background} can't wash the page out. */
+.app{
+  position:relative;isolation:isolate;overflow:hidden;
+  background:#04060B;min-height:100vh;color:var(--txt);
+}
+.app::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    linear-gradient(transparent 0 39px,rgba(47,123,255,.05) 39px 40px),
+    linear-gradient(90deg,transparent 0 39px,rgba(47,123,255,.05) 39px 40px);
+  background-size:40px 40px;
+  mask-image:radial-gradient(ellipse 95% 55% at 50% 0%,#000 0%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse 95% 55% at 50% 0%,#000 0%,transparent 80%);
+}
+.wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 var(--sp) 70px}
+
+/* ---------------- ticker ---------------- */
+.ticker{position:relative;z-index:2;background:var(--blue);overflow:hidden;white-space:nowrap;border-bottom:1px solid #1B4FB0}
+.ticker .run{display:inline-block;padding:9px 0;animation:slide 30s linear infinite;will-change:transform}
+.ticker span{
+  font-weight:700;text-transform:uppercase;letter-spacing:.09em;
+  font-size:14px;color:#fff;padding:0 24px;
+}
+.ticker b{color:#04060B;background:#fff;padding:1px 7px;border-radius:3px;font-weight:700;margin-left:5px}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.ticker .run{animation:none}}
+
+/* ---------------- header ---------------- */
+header.top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 0 20px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand .mk{
+  width:32px;height:32px;flex:none;border:2px solid var(--blue);
+  display:grid;place-items:center;transform:rotate(45deg);
+  box-shadow:0 0 18px rgba(47,123,255,.45);
+}
+.brand .mk i{width:8px;height:8px;background:var(--blue);display:block}
+.brand h2{font-family:"Anton",sans-serif;font-size:clamp(19px,5vw,23px);letter-spacing:.02em;margin:0;font-weight:400;text-transform:uppercase;white-space:nowrap}
+.brand h2 em{color:var(--blue);font-style:normal}
+.top .live{
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:8px;
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);animation:pulse 2s ease-in-out infinite;flex:none}
+@keyframes pulse{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+
+/* ---------------- hero ---------------- */
+.hero{padding:24px 0 42px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--blue-hi);
+  display:flex;align-items:center;gap:12px;margin-bottom:18px;
+}
+.eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(47,123,255,.45),transparent)}
+h1{
+  font-family:"Anton",sans-serif;font-weight:400;margin:0;
+  font-size:clamp(44px,12vw,88px);line-height:.9;text-transform:uppercase;
+}
+h1 em{font-style:normal;color:var(--blue);text-shadow:0 0 38px rgba(47,123,255,.55)}
+.lede{margin:24px 0 0;max-width:58ch;color:var(--mut);font-size:17px;text-transform:uppercase;letter-spacing:.045em;font-weight:500}
+.checks{margin:28px 0 0;padding:0;list-style:none;display:grid;gap:13px}
+.checks li{display:flex;gap:12px;align-items:flex-start;font-size:16px;letter-spacing:.03em;text-transform:uppercase;font-weight:500}
+.checks .ck{
+  width:19px;height:19px;flex:none;border-radius:50%;border:1.5px solid var(--blue);
+  display:grid;place-items:center;margin-top:2px;
+  font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--blue);font-weight:700;
+}
+
+/* ---------------- crosshair stats ---------------- */
+.stats{padding:44px 0 50px;border-bottom:1px solid var(--line)}
+.grid4{display:grid;grid-template-columns:1fr 1fr;position:relative}
+.grid4 .cell{padding:32px 10px;text-align:center}
+.grid4 .val{
+  font-family:"Anton",sans-serif;font-size:clamp(34px,9vw,62px);line-height:1;
+  color:var(--blue);text-shadow:0 0 32px rgba(47,123,255,.5);
+}
+.grid4 .val.down{color:var(--loss);text-shadow:0 0 32px rgba(255,77,98,.4)}
+.grid4 .val.neutral{color:var(--txt);text-shadow:none}
+.grid4 .lab{
+  font-family:"JetBrains Mono",monospace;font-size:9.5px;font-weight:500;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--mut);margin-top:12px;
+}
+.cross-v,.cross-h,.spark{position:absolute;pointer-events:none}
+.cross-v{left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);background:linear-gradient(transparent,rgba(47,123,255,.6),transparent)}
+.cross-h{top:50%;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(47,123,255,.6),transparent)}
+.spark{
+  left:50%;top:50%;width:7px;height:7px;border-radius:50%;background:var(--blue);
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 12px 3px rgba(47,123,255,.95),0 0 50px 14px rgba(47,123,255,.32);
+}
+
+/* ---------------- sections ---------------- */
+.sec{padding:46px 0 0}
+.sec-h{font-family:"Anton",sans-serif;font-size:clamp(25px,6.5vw,38px);text-transform:uppercase;margin:0 0 4px;font-weight:400}
+.sec-h em{font-style:normal;color:var(--blue)}
+.sec-sub{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:22px}
+
+/* ---------------- calendar ---------------- */
+.cal{
+  border:1px solid var(--line-2);border-radius:14px;padding:24px var(--sp) 26px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(47,123,255,.09),transparent 70%),var(--panel);
+}
+.cal-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px}
+.cal-nav button{
+  width:38px;height:38px;border-radius:50%;background:transparent;border:1px solid var(--line-2);
+  color:var(--mut);cursor:pointer;font-size:18px;line-height:1;display:grid;place-items:center;
+}
+.cal-nav button:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+.cal-nav button:disabled{opacity:.25;cursor:default}
+.cal-nav button:focus-visible,.day.has:focus-visible,.filters button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.cal-nav h3{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:13px;letter-spacing:.2em;text-transform:uppercase;margin:0;min-width:170px;text-align:center}
+.cal-hero{text-align:center;margin-bottom:22px}
+.cal-hero .u{font-family:"Anton",sans-serif;font-size:clamp(40px,11vw,66px);line-height:1;color:var(--blue);text-shadow:0 0 34px rgba(47,123,255,.45)}
+.cal-hero .u.down{color:var(--loss);text-shadow:0 0 34px rgba(255,77,98,.4)}
+.cal-hero .u small{font-size:.38em;font-family:"Barlow Condensed",sans-serif;font-weight:700;margin-left:8px;color:var(--txt)}
+.cal-hero .pair{display:flex;justify-content:center;margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+.cal-hero .pair div{padding:0 clamp(16px,6vw,38px)}
+.cal-hero .pair div+div{border-left:1px solid var(--line)}
+.cal-hero .pair b{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:clamp(17px,4.6vw,23px);display:block}
+.cal-hero .pair span{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);display:block;margin-top:7px}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+.dow span{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);text-align:center}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{
+  aspect-ratio:1/.88;border-radius:9px;border:1px solid var(--line);background:#070B12;
+  display:grid;place-items:center;position:relative;padding:0;
+  font-family:"JetBrains Mono",monospace;font-size:clamp(9px,2.7vw,12px);font-weight:700;color:var(--mut-2);
+}
+.day.blank{opacity:0;border:0;background:none}
+.day .n{position:absolute;top:4px;left:5px;font-size:8px;font-weight:400;opacity:.55}
+.day.has{cursor:pointer;color:#fff;border-color:var(--line-2)}
+.day.up{background:rgba(47,123,255,var(--i,.2));border-color:rgba(47,123,255,.55);color:#DCE9FF}
+.day.dn{background:rgba(255,77,98,calc(var(--i,.2)*.5));border-color:rgba(255,77,98,.38);color:#FFD6DB}
+.day.sel{box-shadow:0 0 0 2px var(--blue),0 0 22px rgba(47,123,255,.5)}
+.cal-tip{text-align:center;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut-2);margin-top:18px}
+
+/* ---------------- filters ---------------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{
+  background:transparent;border:1px solid var(--line-2);color:var(--mut);
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;padding:9px 15px;border-radius:999px;cursor:pointer;
+}
+.filters button[aria-selected="true"]{border-color:var(--blue);color:var(--blue);background:rgba(47,123,255,.1)}
+.chip{display:none;align-items:center;gap:10px;margin-top:16px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+.chip.on{display:flex}
+.chip button{background:none;border:0;color:var(--mut);cursor:pointer;font:inherit;text-decoration:underline;padding:0}
+
+/* ---------------- ticket cards ---------------- */
+.log{margin-top:18px;display:grid;gap:10px}
+.tk{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:15px 17px 14px;position:relative;overflow:hidden}
+.tk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--line-2)}
+.tk.w::before{background:var(--blue);box-shadow:0 0 14px rgba(47,123,255,.65)}
+.tk.l::before{background:#3E1622}
+.tk-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.tk-id{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.tk-id b{color:var(--txt);font-weight:700}
+.tk-pl{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:18px;white-space:nowrap}
+.up{color:var(--blue)} .dn{color:var(--loss)} .nu{color:var(--mut)}
+.legs{display:grid;gap:9px}
+.lg{display:flex;gap:11px;align-items:flex-start}
+.lg .m{width:18px;height:18px;flex:none;border-radius:4px;display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:800;margin-top:3px}
+.lg .m.w{background:rgba(47,123,255,.16);color:var(--blue);border:1px solid rgba(47,123,255,.45)}
+.lg .m.l{background:rgba(255,77,98,.1);color:var(--loss);border:1px solid rgba(255,77,98,.3)}
+.lg .m.p{background:#0F1520;color:var(--mut);border:1px solid var(--line-2)}
+.lg .t{flex:1;min-width:0}
+.lg .t b{font-size:16.5px;font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+.lg .t .px{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--blue-hi);margin-left:7px;font-weight:500}
+.lg .t .gm{display:block;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--mut);margin-top:1px}
+.tk-foot{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mut-2)}
+
+/* ---------------- live ---------------- */
+.live-box{
+  border:1px solid var(--blue);border-radius:14px;padding:20px 18px;
+  background:radial-gradient(ellipse 70% 100% at 0% 0%,rgba(47,123,255,.15),transparent 70%),var(--panel-2);
+}
+.live-box .lab{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:9px;margin-bottom:15px}
+
+/* ---------------- cta + plans ---------------- */
+.cta{
+  display:inline-block;margin-top:32px;padding:15px 36px;border-radius:999px;
+  background:var(--blue);border:1px solid var(--blue);color:#fff;text-decoration:none;
+  font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:17px;
+  box-shadow:0 0 34px rgba(47,123,255,.4);
+}
+.cta:hover{background:#4A8CFF}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.plan{
+  position:relative;display:flex;flex-direction:column;
+  border:1px solid var(--line-2);border-radius:14px;background:var(--panel);
+  padding:24px 20px 20px;
+}
+.plan.feat{
+  border-color:var(--blue);
+  background:radial-gradient(ellipse 90% 70% at 50% 0%,rgba(47,123,255,.15),transparent 70%),var(--panel-2);
+}
+.plan .tag{
+  position:absolute;top:-9px;left:18px;background:var(--blue);color:#04060B;
+  font-family:"JetBrains Mono",monospace;font-size:8.5px;font-weight:800;
+  letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:999px;
+}
+.plan .nm{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.plan .pr{font-family:"Anton",sans-serif;font-size:clamp(30px,7.5vw,42px);line-height:1;margin:14px 0 5px}
+.plan .per{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:22px}
+.plan a{
+  margin-top:auto;display:block;text-align:center;text-decoration:none;
+  padding:12px 16px;border-radius:999px;border:1px solid var(--line-2);color:var(--txt);
+  font-weight:700;text-transform:uppercase;letter-spacing:.09em;font-size:15px;
+}
+.plan a:hover{border-color:var(--blue);color:var(--blue)}
+.plan a.solid{background:var(--blue);border-color:var(--blue);color:#fff}
+.plan a.solid:hover{background:#4A8CFF;color:#fff}
+
+/* ---------------- notes ---------------- */
+.notes{margin-top:52px;padding-top:26px;border-top:1px solid var(--line);color:var(--mut)}
+.notes h4{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--txt);margin:0 0 12px;font-weight:700}
+.notes p{margin:0 0 12px;max-width:64ch;font-size:16px;letter-spacing:.02em}
+.notes .fine{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--mut-2);max-width:70ch}
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     YOUR DATA — everything on the page is derived from this.
+     american = odds at the time the bet was placed (e.g. +170)
+     result: 'W' | 'L' | null (null = not settled yet)
+     ========================================================= -->
+<script>
+const UNIT = 100;          // 1 unit = $100
+const SINGLE_STAKE = 100;  // stake on each leg as a standalone single
+
+/* Checkout links. Paste your four Whop checkout links here and every
+   button on the page points at the right one. `store` is the fallback
+   used for any plan you leave blank.
+   Whop dashboard > Checkout links > Create checkout link > copy. */
+const CHECKOUT = {
+  store:   'https://whop.com/two-leg-method/',
+  trial:   'https://whop.com/two-leg-method/free-3-day-trial-29/',
+  weekly:  'https://whop.com/two-leg-method/weekly-f6-595d/',
+  monthly: 'https://whop.com/two-leg-method/monthly-10-3fcf/',
+  annual:  'https://whop.com/two-leg-method/annual-02/',
+};
+
+const BETS = [
+  { date:'2026-07-21', cost:44.97, payout:326.08, legs:[
+    { pick:'St. Louis -1.5',    game:'St. Louis at LA Angels',     american:+170, result:'L', score:'STL 1 — LAA 5' },
+    { pick:'Cincinnati -1.5',   game:'Cincinnati at Seattle',      american:+178, result:'W', score:'CIN 4 — SEA 2' },
+  ]},
+  { date:'2026-07-25', cost:49.99, payout:405.84, legs:[
+    { pick:'Boston -1.5',       game:'Toronto at Boston',          american:+194, result:'L', score:'TOR 6 — BOS 0' },
+    { pick:'Atlanta -1.5',      game:'Atlanta at Baltimore',       american:+163, result:'L', score:'ATL 2 — BAL 3' },
+  ]},
+  { date:'2026-07-27', cost:49.97, payout:279.48, legs:[
+    { pick:'Houston -1.5',      game:'Houston at LA Angels',       american:+156, result:'W', score:'HOU 6 — LAA 4' },
+    { pick:'Milwaukee -1.5',    game:'Milwaukee at San Francisco', american:+127, result:'L', score:'MIL 0 — SF 3'  },
+  ]},
+  { date:'2026-07-28', cost:50.99, payout:318.75, legs:[
+    { pick:'Chi. Cubs -1.5',    game:'Chi. Cubs at St. Louis',     american:+150, result:'W', score:'CHC 10 — STL 2' },
+    { pick:'Washington -1.5',   game:'Toronto at Washington',      american:+156, result:'W', score:'TOR 6 — WSH 8'  },
+  ]},
+  { date:'2026-07-29', cost:49.99, payout:284.57, legs:[
+    { pick:'Chi. Cubs -1.5',    game:'Chi. Cubs at St. Louis',     american:+156, result:'L', score:'CHC 2 — STL 3 (10)' },
+    { pick:'Houston -1.5',      game:'Houston at LA Angels',       american:+127, result:'W', score:'HOU 7 — LAA 4'     },
+  ]},
+  { date:'2026-07-30', cost:49.99, payout:320.92, legs:[
+    { pick:'Chi. Cubs -1.5',    game:'Chi. Cubs at St. Louis',     american:+170, result:'W', score:'CHC 4 — STL 2' },
+    { pick:'San Diego -1.5',    game:'San Francisco at San Diego', american:+144, result:'L', score:'SF 4 — SD 1'   },
+  ]},
+  { date:'2026-07-31', cost:49.99, payout:405.84, legs:[
+    { pick:'Philadelphia -1.5', game:'Philadelphia at Baltimore',  american:+170, result:'L', score:'PHI 4 — BAL 6' },
+    { pick:'Arizona -1.5',      game:'Arizona at Cleveland',       american:+213, result:'W', score:'ARI 4 — CLE 1' },
+  ]},
+  { date:'2026-08-01', cost:49.98, payout:286.20, legs:[
+    { pick:'Toronto -1.5',      game:'St. Louis at Toronto',       american:+144, result:'W', score:'STL 1 — TOR 5' },
+    { pick:'Milwaukee -1.5',    game:'Milwaukee at LA Angels',     american:+144, result:'W', score:'MIL 3 — LAA 1' },
+  ]},
+  { date:'2026-08-02', cost:49.97, payout:318.67, legs:[
+    { pick:'Detroit -1.5',      game:'Detroit at Athletics',       american:+138, result:'W', score:'DET 11 — ATH 0' },
+    { pick:'San Diego -1.5',    game:'San Francisco at San Diego', american:+178, result:'L', score:'SF 4 — SD 5'    },
+  ]},
+  { date:'2026-08-03', cost:50.00, payout:308.00, legs:[
+    { pick:'Milwaukee -1.5',    game:'Pittsburgh at Milwaukee',    american:+139, result:'L', score:'PIT 4 — MIL 3' },
+    { pick:'San Diego -1.5',    game:'San Diego at Arizona',       american:+158, result:'L', score:'SD 1 — ARI 5'  },
+  ]},
+  { date:'2026-08-04', cost:50.00, payout:307.39, legs:[
+    { pick:'Boston -1.5',       game:'Chi. White Sox at Boston',   american:+143, result:'W', score:'CWS 2 — BOS 14' },
+    { pick:'Houston -1.5',      game:'Toronto at Houston',         american:+153, result:'W', score:'TOR 2 — HOU 7'  },
+  ]},
+];
+</script>
+
+<div class="app">
+
+<div class="ticker"><div class="run" id="ticker"></div></div>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand"><span class="mk"><i></i></span><h2>2-Leg <em>Method</em></h2></div>
+    <div class="live"><span class="dot"></span><span id="liveLabel">Tracking</span></div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow" id="heroEyebrow"></div>
+    <h1>Profitable<br>two-leg<br><em>parlays.</em></h1>
+    <ul class="checks">
+      <li><span class="ck">✓</span><span>Profitable 2-legs. That's the whole product.</span></li>
+      <li><span class="ck">✓</span><span>Across every league, all year.</span></li>
+    </ul>
+    <a class="cta" href="#plans">Start 3 days free</a>
+  </section>
+
+  <section class="stats" aria-label="All-time totals">
+    <div class="grid4">
+      <div class="cross-v"></div><div class="cross-h"></div><div class="spark"></div>
+      <div class="cell"><div class="val" id="s1">—</div><div class="lab">Units Up</div></div>
+      <div class="cell"><div class="val" id="s2">—</div><div class="lab">ROI</div></div>
+      <div class="cell"><div class="val" id="s3">—</div><div class="lab">Profit</div></div>
+      <div class="cell"><div class="val neutral" id="s4">—</div><div class="lab">Total Risked</div></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2 class="sec-h">Unit <em>calendar</em></h2>
+    <div class="sec-sub">Day by day, at $100 a unit</div>
+    <div class="cal">
+      <div class="cal-nav">
+        <button id="prevM" aria-label="Previous month">&lsaquo;</button>
+        <h3 id="monthLabel">—</h3>
+        <button id="nextM" aria-label="Next month">&rsaquo;</button>
+      </div>
+      <div class="cal-hero">
+        <div class="u" id="monthUnits">—</div>
+        <div class="pair">
+          <div><b id="monthProfit">—</b><span>Profit at $100/unit</span></div>
+          <div><b id="monthROI">—</b><span>Month ROI</span></div>
+        </div>
+      </div>
+      <div class="dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+      <div class="days" id="days"></div>
+      <div class="cal-tip">Tap a day to see its tickets</div>
+    </div>
+  </section>
+
+  <section class="sec" id="history">
+    <h2 class="sec-h">Bet by <em>bet</em></h2>
+    <div class="sec-sub">Newest first</div>
+    <div class="filters" role="tablist">
+      <button role="tab" aria-selected="true"  data-v="all">All positions</button>
+      <button role="tab" aria-selected="false" data-v="parlay">Parlays</button>
+      <button role="tab" aria-selected="false" data-v="single">Singles</button>
+    </div>
+    <div class="chip" id="dayChip"><span id="dayChipTxt"></span><button id="clearDay">Clear</button></div>
+    <div class="log" id="log"></div>
+  </section>
+
+  <section class="sec" id="liveSec" hidden>
+    <h2 class="sec-h">On the <em>board</em></h2>
+    <div class="sec-sub">Posted before first pitch</div>
+    <div class="live-box" id="liveBox"></div>
+  </section>
+
+  <section class="sec" id="plans">
+    <h2 class="sec-h">Get the <em>plays</em></h2>
+    <div class="sec-sub">Every 2-leg, every league, sent before lock</div>
+    <div class="plans">
+      <div class="plan feat">
+        <span class="tag">Start here</span>
+        <div class="nm">Trial</div>
+        <div class="pr">Free</div>
+        <div class="per">3 days</div>
+        <a class="solid" href="#" data-plan="trial">Start free</a>
+      </div>
+      <div class="plan">
+        <div class="nm">Weekly</div>
+        <div class="pr">$19.99</div>
+        <div class="per">per week</div>
+        <a href="#" data-plan="weekly">Choose</a>
+      </div>
+      <div class="plan">
+        <div class="nm">Monthly</div>
+        <div class="pr">$39.99</div>
+        <div class="per">per month</div>
+        <a href="#" data-plan="monthly">Choose</a>
+      </div>
+      <div class="plan">
+        <span class="tag">Best value</span>
+        <div class="nm">Annual</div>
+        <div class="pr">$399</div>
+        <div class="per">per year · $33/mo</div>
+        <a href="#" data-plan="annual">Choose</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <h4>How this is graded</h4>
+    <p>Both legs have to land outright — no pushes, no partial credit. Grading uses the official final result, overtime and extra innings included.</p>
+    <p>Staking is flat: half a unit ($50) on the parlay, one full unit ($100) on each single. Every price shown is the American odds at the time the bet was placed.</p>
+    <p class="fine">This is a log of what I bet. Subscriptions buy access to the plays, not a result — nothing here is guaranteed and past performance doesn't predict future returns. The sample is small, a couple of tickets carry most of the return, and a run like this says very little about what comes next. Any of it can go to zero. 21+, and if betting has stopped being fun, call 1-800-GAMBLER.</p>
+  </section>
+
+</div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const money = n => (n<0?'−':'+') + '$' + Math.abs(n).toFixed(2);
+const plain = n => '$' + n.toFixed(2);
+const uni   = n => (n<0?'−':'+') + Math.abs(n).toFixed(2);
+const dir   = n => n<0 ? 'dn' : 'up';
+
+/* ---------- pricing ---------- */
+function mult(l){
+  if(l.american!=null) return l.american<0 ? 1+100/Math.abs(l.american) : 1+l.american/100;
+  if(l.price!=null)    return 100/l.price;
+  return null;
+}
+function label(l){
+  if(l.american!=null) return (l.american>0?'+':'')+l.american;
+  if(l.price!=null)    return l.price+'¢';
+  return '';
+}
+
+/* ---------- flatten into positions ---------- */
+const pos = [];
+BETS.forEach((b,i)=>{
+  const done = b.legs.every(l=>l.result);
+  const won  = done && b.legs.every(l=>l.result==='W');
+  pos.push({kind:'parlay', date:b.date, stake:b.cost,
+            ret: done ? (won?b.payout:0) : null, res: done ? (won?'W':'L') : null});
+  b.legs.forEach(l=>{
+    const m = mult(l);
+    pos.push({kind:'single', date:b.date, stake:(m==null?null:SINGLE_STAKE),
+              ret:(m!=null && l.result) ? (l.result==='W'?SINGLE_STAKE*m:0) : null, res:l.result});
+  });
+});
+const settled = pos.filter(p=>p.ret!==null);
+const agg = f => settled.reduce((t,p)=>t+f(p),0);
+
+const staked  = agg(p=>p.stake);
+const net     = agg(p=>p.ret) - staked;
+const roi     = staked ? net/staked*100 : 0;
+const roiTxt  = (roi<0?'−':'+')+Math.abs(roi).toFixed(1)+'%';
+const combos  = settled.filter(p=>p.kind==='parlay');
+const sings   = settled.filter(p=>p.kind==='single');
+
+/* ---------- dates ---------- */
+const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const short = d => { const [,m,dd]=d.split('-'); return `${+m}/${+dd}`; };
+
+/* ---------- headline ---------- */
+$('#s1').textContent = uni(net/UNIT)+'u';
+$('#s2').textContent = roiTxt;
+$('#s3').textContent = money(net);
+$('#s4').textContent = plain(staked);
+['#s1','#s2','#s3'].forEach(id=>$(id).classList.toggle('down', net<0));
+
+$('#heroEyebrow').textContent = `${settled.length} positions settled · updated ${short(BETS[BETS.length-1].date)}`;
+$('#liveLabel').textContent = 'Live · ' + short(BETS[BETS.length-1].date);
+
+const tick =
+  `<span>ROI <b>${roiTxt}</b></span>` +
+  `<span>Units up <b>${uni(net/UNIT)}u</b></span>` +
+  `<span>Profit <b>${money(net)}</b></span>` +
+  `<span>${settled.length} positions settled</span>` +
+  `<span>Every score verified</span>`;
+$('#ticker').innerHTML = tick + tick;
+
+/* ---------- per-day rollup ---------- */
+const dayNet = {};
+settled.forEach(p=>{ dayNet[p.date] = (dayNet[p.date]||0) + (p.ret - p.stake); });
+
+/* ---------- calendar ---------- */
+const months = [...new Set(BETS.map(b=>b.date.slice(0,7)))].sort();
+let curMonth = months[months.length-1];
+let selDay = null;
+
+function drawCal(){
+  const [y,m] = curMonth.split('-').map(Number);
+  $('#monthLabel').textContent = MN[m-1] + ' ' + y;
+  const i = months.indexOf(curMonth);
+  $('#prevM').disabled = i<=0;
+  $('#nextM').disabled = i>=months.length-1;
+
+  const inM  = settled.filter(p=>p.date.startsWith(curMonth));
+  const mNet = inM.reduce((t,p)=>t+(p.ret-p.stake),0);
+  const mRisk= inM.reduce((t,p)=>t+p.stake,0);
+  $('#monthUnits').innerHTML = uni(mNet/UNIT)+'<small>Units</small>';
+  $('#monthUnits').classList.toggle('down', mNet<0);
+  $('#monthProfit').textContent = money(mNet);
+  $('#monthProfit').className = dir(mNet);
+  const mRoi = mRisk ? mNet/mRisk*100 : 0;
+  $('#monthROI').textContent = mRisk ? (mRoi<0?'−':'+')+Math.abs(mRoi).toFixed(1)+'%' : '—';
+  $('#monthROI').className = mRisk ? dir(mNet) : '';
+
+  const first = new Date(y, m-1, 1).getDay();
+  const len   = new Date(y, m, 0).getDate();
+  const peak  = Math.max(1, ...Object.values(dayNet).map(v=>Math.abs(v)));
+
+  let html = '';
+  for(let k=0;k<first;k++) html += `<div class="day blank"></div>`;
+  for(let d=1; d<=len; d++){
+    const key = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const v = dayNet[key];
+    if(v===undefined){
+      html += `<div class="day"><span class="n">${d}</span></div>`;
+    }else{
+      const inten = (0.16 + Math.abs(v)/peak*0.62).toFixed(2);
+      html += `<button class="day has ${v>=0?'up':'dn'}${selDay===key?' sel':''}" style="--i:${inten}" data-d="${key}"><span class="n">${d}</span>${uni(v/UNIT)}u</button>`;
+    }
+  }
+  $('#days').innerHTML = html;
+
+  document.querySelectorAll('.day.has').forEach(el=>{
+    el.addEventListener('click',()=>{
+      selDay = (selDay===el.dataset.d) ? null : el.dataset.d;
+      drawCal(); draw();
+      if(selDay) $('#history').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+
+/* ---------- history ---------- */
+let view = 'all';
+
+function legRow(l){
+  const k = l.result==='W'?'w':l.result==='L'?'l':'p';
+  const g = l.result==='W'?'W':l.result==='L'?'L':'•';
+  return `<div class="lg"><span class="m ${k}">${g}</span><span class="t">
+    <b>${l.pick}</b><span class="px">${label(l)}</span>
+    <span class="gm">${l.game} · ${l.score}</span></span></div>`;
+}
+
+function card(res, id, pl, legs, foot){
+  const c = res==='W' ? 'w' : res==='L' ? 'l' : '';
+  const p = pl===null ? '<span class="nu">Open</span>' : `<span class="${dir(pl)}">${money(pl)}</span>`;
+  return `<article class="tk ${c}">
+    <div class="tk-top"><div class="tk-id">${id}</div><div class="tk-pl">${p}</div></div>
+    <div class="legs">${legs}</div>
+    <div class="tk-foot">${foot}</div></article>`;
+}
+
+function draw(){
+  const out = [];
+  BETS.slice().reverse().forEach(b=>{
+    if(selDay && b.date!==selDay) return;
+    if(!b.legs.every(l=>l.result)) return;
+    const won = b.legs.every(l=>l.result==='W');
+
+    if(view!=='single'){
+      out.push(card(won?'W':'L',
+        `${short(b.date)} &nbsp;·&nbsp; <b>2-leg parlay</b>`,
+        (won?b.payout:0) - b.cost,
+        b.legs.map(legRow).join(''),
+        `<span>Risked ${plain(b.cost)}</span><span>To win ${plain(b.payout)}</span>`));
+    }
+    if(view!=='parlay'){
+      b.legs.forEach(l=>{
+        const m = mult(l); if(m==null) return;
+        const back = l.result==='W' ? SINGLE_STAKE*m : 0;
+        out.push(card(l.result,
+          `${short(b.date)} &nbsp;·&nbsp; <b>Single</b>`,
+          back - SINGLE_STAKE,
+          legRow(l),
+          `<span>Risked ${plain(SINGLE_STAKE)}</span><span>Returned ${plain(back)}</span>`));
+      });
+    }
+  });
+  $('#log').innerHTML = out.length ? out.join('')
+    : `<article class="tk"><div class="tk-id">Nothing settled matches this filter.</div></article>`;
+
+  $('#dayChip').classList.toggle('on', !!selDay);
+  if(selDay) $('#dayChipTxt').textContent = `${short(selDay)} · ${uni(dayNet[selDay]/UNIT)}u`;
+}
+
+document.querySelectorAll('.filters button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filters button').forEach(b=>b.setAttribute('aria-selected', b===btn));
+    view = btn.dataset.v; draw();
+  });
+});
+$('#clearDay').addEventListener('click',()=>{ selDay=null; drawCal(); draw(); });
+$('#prevM').addEventListener('click',()=>{ curMonth = months[months.indexOf(curMonth)-1]; drawCal(); });
+$('#nextM').addEventListener('click',()=>{ curMonth = months[months.indexOf(curMonth)+1]; drawCal(); });
+
+/* ---------- live tickets ---------- */
+(function(){
+  const open = BETS.filter(b=>b.legs.some(l=>!l.result));
+  if(!open.length) return;
+  $('#liveSec').hidden = false;
+  $('#liveBox').innerHTML = open.map(b=>
+    `<div class="lab"><span class="dot"></span>${short(b.date)} · ${plain(b.cost)} to win ${plain(b.payout)}</div>
+     <div class="legs">${b.legs.map(legRow).join('')}</div>`).join('');
+})();
+
+/* ---------- checkout links ---------- */
+document.querySelectorAll('[data-plan]').forEach(a=>{
+  a.href = CHECKOUT[a.dataset.plan] || CHECKOUT.store;
+  a.target = '_blank';
+  a.rel = 'noopener';
+});
+
+drawCal();
+draw();
+</script>
+</body>
+</html>
